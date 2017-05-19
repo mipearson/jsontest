@@ -14,6 +14,8 @@ Findings from below:
 
   * Rails "helpfully" replaces the `.to_json` methods on objects with ActiveSupport::JSON instead of Ruby's JSON.
   * I *should* be able to then use `Oj.add_to_json` to override this, but it isn't working, according to the benchmarks.
+  * Omitting both YAJL and JSON from the loaded gems, and using `Oj.mimic_json` fixes `.to_json` performace (of course, this doesn't work with Rails, as it loads JSON for you)
+  * `Oj.add_to_json` does not appear to be overriding `.to_json` even without Rails around
   * Ruby's native JSON generator is actually pretty fast! It's not as fast as Oj or Yajl, but it's much faster than I expected it to be.
   * `ActiveSupport::JSON` performance is terrible, and I really hope the Rails team find some way to get rid of it.
 
@@ -39,6 +41,7 @@ JSON:             6.870000   0.110000   6.980000 (  7.011505)
 to_json:          7.010000   0.120000   7.130000 (  7.174771)
 JSON (mimic):     1.300000   0.120000   1.420000 (  1.440786)
 to_json (mimic):  6.860000   0.210000   7.070000 (  7.093225)
+to_json (Oj):     6.010000   0.100000   6.110000 (  6.133154)
 ```
 
 ## With Rails
@@ -74,3 +77,15 @@ JSON:             6.720000   0.110000   6.830000 (  6.845043)
 to_json:         64.230000   0.340000  64.570000 ( 64.807216)
 to_json (rails): 27.170000   0.310000  27.480000 ( 27.571227)
 ```
+
+## Only using OJ (no JSON or Yajl gems)
+
+➜  jsontest git:(master) ✗ ./benchmark_json.rb --oj-only
+=== dumping ===
+                      user     system      total        real
+OJ:               0.830000   0.080000   0.910000 (  0.908115)
+OJc:              1.090000   0.080000   1.170000 (  1.175197)
+OJr:              1.140000   0.100000   1.240000 (  1.248836)
+JSON (mimic):     1.120000   0.110000   1.230000 (  1.237748)
+to_json (mimic):  1.110000   0.110000   1.220000 (  1.220929)
+to_json (Oj):     1.100000   0.100000   1.200000 (  1.204061)
