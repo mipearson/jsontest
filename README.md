@@ -16,7 +16,8 @@ Findings from below:
   * I *should* be able to then use `Oj.add_to_json` to override this, but it isn't working, according to the benchmarks.
   * Omitting both YAJL and JSON from the loaded gems, and using `Oj.mimic_json` fixes `.to_json` performace (of course, this doesn't work with Rails, as it loads JSON for you)
   * `Oj.add_to_json` does not appear to be overriding `.to_json` even without Rails around
-  * Ruby's native JSON generator is actually pretty fast! It's not as fast as Oj or Yajl, but it's much faster than I expected it to be.
+  * [Overriding the ActiveSupport::JSON encoder with Oj](https://precompile.com/2015/07/25/rails-activesupport-json.html) helps, but doesn't bring it close to `Oj.dump`.
+  * Ruby's native JSON generator is actually pretty fast! It's not as fast as Oj or Yajl, but it's much faster than I expected it to be (the `as hack` number in the first example).
   * `ActiveSupport::JSON` performance is terrible, and I really hope the Rails team find some way to get rid of it.
   * Using Ruby 2.4 instead of Ruby 2.3.1 does not appear to change the benchmarks significantly
 
@@ -61,6 +62,7 @@ to_json:         60.880000   0.330000  61.210000 ( 61.368512)
 JSON (mimic):     1.250000   0.110000   1.360000 (  1.373204)
 to_json (mimic): 27.120000   0.390000  27.510000 ( 27.576475)
 to_json (rails): 24.840000   0.480000  25.320000 ( 25.387949)
+to_json (as hack):  9.430000   0.270000   9.700000 (  9.725460)
 ```
 
 Another run without the `Oj.mimic_JSON`, just in case that was confusing things:

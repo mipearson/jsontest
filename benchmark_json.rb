@@ -11,6 +11,15 @@ if use_rails
   require 'yajl' unless oj_only
   require 'benchmark'
 
+  # as per https://precompile.com/2015/07/25/rails-activesupport-json.html
+  module ActiveSupport::JSON::Encoding
+    class Oj < JSONGemEncoder
+      def encode value
+        ::Oj.dump(value.as_json)
+      end
+    end
+  end
+
   puts 'Loading rails via ./config/application'
 else
   require 'bundler/setup'
@@ -46,6 +55,9 @@ Benchmark.bm(15) do |x|
     Oj.optimize_rails
     Oj.add_to_json
     x.report('to_json (rails):') { n.times { obj.to_json } }
+    # as per https://precompile.com/2015/07/25/rails-activesupport-json.html
+    ActiveSupport.json_encoder = ActiveSupport::JSON::Encoding::Oj
+    x.report('to_json (as hack):') { n.times { obj.to_json } }
   else
     Oj.add_to_json
     x.report('to_json (Oj):') { n.times { obj.to_json } }
