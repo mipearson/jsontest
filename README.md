@@ -1,37 +1,58 @@
+# JSON Benchmarking
+
+With:
+
+  * Ruby JSON
+  * YAJL
+  * Oj
+  * Oj in "Rails" mode
+  * ActiveSupport::JSON
+
+Created originally to determine why our JSON generation was taking 50 ms for 168kb of API response even though we were using Yajl, then refined to try to work out why `.to_json` was so slow.
+
+Findings from below:
+
+  * Rails "helpfully" replaces the `.to_json` methods on objects with ActiveSupport::JSON instead of Ruby's JSON.
+  * I *should* be able to then use `Oj.add_to_json` to override this, but it isn't working, according to the benchmarks.
+  * Ruby's native JSON generator is actually pretty fast! It's not as fast as Oj or Yajl, but it's much faster than I expected it to be.
+  * `ActiveSupport::JSON` performance is terrible, and I really hope the Rails team find some way to get rid of it.
+
+## Environment
+
+  * ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-darwin14]
+  * MacBook Pro (Retina, 13-inch, Mid 2014, 3Ghz Core i7)
+  * Rails 5.1.1, oj 3.0.8, yajl-ruby 1.30
 
 ## Without Rails
 
-➜  bin/benchmark_json.rb
+```
+> ./benchmark_json.rb --rails
 === dumping ===
-              user     system      total        real
-OJ:       1.500000   0.160000   1.660000 (  1.783101)
-OJr:      2.030000   0.180000   2.210000 (  2.453441)
-Yajl:     4.450000   0.200000   4.650000 (  4.746896)
-JSON:     6.330000   0.170000   6.500000 (  6.504068)
-to_json:  6.140000   0.160000   6.300000 (  6.305372)
-JSON (mimic):  1.200000   0.120000   1.320000 (  1.315646)
-to_json (mimic):  6.130000   0.080000   6.210000 (  6.221543)
+                      user     system      total        real
+OJ:               1.090000   0.130000   1.220000 (  1.233473)
+OJc:              1.380000   0.150000   1.530000 (  1.569449)
+OJr:              1.360000   0.130000   1.490000 (  1.501414)
+Yajl:             4.080000   0.180000   4.260000 (  4.277213)
+JSON:             6.870000   0.110000   6.980000 (  7.011505)
+to_json:          7.010000   0.120000   7.130000 (  7.174771)
+JSON (mimic):     1.300000   0.120000   1.420000 (  1.440786)
+to_json (mimic):  6.860000   0.210000   7.070000 (  7.093225)
+```
 
-➜ bin/benchmark_json.rb --rails
-Loading rails via ../config/application
-=== dumping ===
-              user     system      total        real
-OJ:       1.710000   0.180000   1.890000 (  2.079460)
-OJr:     50.920000   0.740000  51.660000 ( 54.483195)
-Yajl:     5.360000   0.260000   5.620000 (  6.118653)
-JSON:     6.830000   0.120000   6.950000 (  7.055530)
-to_json: 56.680000   0.340000  57.020000 ( 57.222351)
-JSON (mimic):  1.250000   0.130000   1.380000 (  1.378167)
-to_json (mimic): 26.710000   0.350000  27.060000 ( 27.118392)
+## With Rails
 
-➜ bin/benchmark_json.rb --rails
-Loading rails via ../config/application
+```
+> ./benchmark_json.rb --rails
+Loading rails via ./config/application
 === dumping ===
-              user     system      total        real
-OJ:       1.690000   0.160000   1.850000 (  1.961036)
-OJr:     46.440000   0.470000  46.910000 ( 47.738998)
-Yajl:     4.600000   0.210000   4.810000 (  4.853049)
-JSON:     6.780000   0.100000   6.880000 (  6.917303)
-to_json: 65.040000   0.960000  66.000000 ( 69.644294)
-JSON (mimic):  1.320000   0.130000   1.450000 (  1.453163)
-to_json (mimic): 27.920000   0.410000  28.330000 ( 28.461583)
+                      user     system      total        real
+OJ:               0.960000   0.100000   1.060000 (  1.069644)
+OJc:              1.230000   0.120000   1.350000 (  1.346381)
+OJr:             46.660000   0.420000  47.080000 ( 47.212316)
+Yajl:             3.970000   0.110000   4.080000 (  4.084659)
+JSON:             6.500000   0.110000   6.610000 (  6.636652)
+to_json:         60.880000   0.330000  61.210000 ( 61.368512)
+JSON (mimic):     1.250000   0.110000   1.360000 (  1.373204)
+to_json (mimic): 27.120000   0.390000  27.510000 ( 27.576475)
+to_json (rails): 24.840000   0.480000  25.320000 ( 25.387949)
+```

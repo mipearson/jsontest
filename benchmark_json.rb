@@ -24,7 +24,7 @@ obj = JSON.parse(str)
 n = 1000
 
 puts '=== dumping ==='
-Benchmark.bm(7) do |x|
+Benchmark.bm(15) do |x|
   x.report('OJ:') { n.times { Oj.dump(obj) } }
   x.report('OJc:') { n.times { Oj.dump(obj, mode: :compat) } }
   x.report('OJr:') { n.times { Oj.dump(obj, mode: :rails) } }
