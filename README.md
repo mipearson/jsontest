@@ -19,10 +19,10 @@ Findings from below:
 
 Also:
 
-  * [Overriding the ActiveSupport::JSON encoder with Oj](https://precompile.com/2015/07/25/rails-activesupport-json.html) helps, but doesn't bring it close to `Oj.dump`.
+  * [Overriding the ActiveSupport::JSON encoder with Oj](https://precompile.com/2015/07/25/rails-activesupport-json.html) helps, but doesn't bring it close to `Oj.dump` (the `as hack` number in the first Rails example).
   * Using Ruby 2.4 instead of Ruby 2.3.1 does not appear to change the benchmarks significantly
   * `ActiveSupport::JSON` performance is terrible, and I really hope the Rails team find some way to get rid of it.
-  * Ruby's native JSON generator is actually pretty fast! It's not as fast as Oj or Yajl, but it's much faster than I expected it to be (the `as hack` number in the first example).
+  * Ruby's native JSON generator is actually pretty fast! It's not as fast as Oj or Yajl, but it's much faster than I expected it to be.
 
 ## Environment
 
