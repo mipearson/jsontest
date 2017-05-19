@@ -23,6 +23,8 @@ Findings from below:
   * MacBook Pro (Retina, 13-inch, Mid 2014, 3Ghz Core i7)
   * Rails 5.1.1, oj 3.0.8, yajl-ruby 1.30
 
+The JSON being encoded is representative of our of our larger, but very frequently accessed, public APIs used by our Javascript components.
+
 ## Without Rails
 
 ```
@@ -55,4 +57,20 @@ to_json:         60.880000   0.330000  61.210000 ( 61.368512)
 JSON (mimic):     1.250000   0.110000   1.360000 (  1.373204)
 to_json (mimic): 27.120000   0.390000  27.510000 ( 27.576475)
 to_json (rails): 24.840000   0.480000  25.320000 ( 25.387949)
+```
+
+Another run without the `Oj.mimic_JSON`, just in case that was confusing things:
+
+```
+./benchmark_json.rb --no-mimic --rails
+Loading rails via ./config/application
+=== dumping ===
+                      user     system      total        real
+OJ:               1.090000   0.100000   1.190000 (  1.192712)
+OJc:              1.360000   0.120000   1.480000 (  1.484521)
+OJr:             46.860000   0.420000  47.280000 ( 47.421344)
+Yajl:             4.170000   0.170000   4.340000 (  4.350558)
+JSON:             6.720000   0.110000   6.830000 (  6.845043)
+to_json:         64.230000   0.340000  64.570000 ( 64.807216)
+to_json (rails): 27.170000   0.310000  27.480000 ( 27.571227)
 ```

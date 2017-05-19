@@ -4,6 +4,8 @@ APP_PATH = File.expand_path('./config/application', __dir__)
 
 use_rails = ARGV.include?('--rails')
 
+no_mimic = ARGV.include?('--no-mimic')
+
 if use_rails
   require_relative './config/application'
   require 'yajl'
@@ -32,9 +34,11 @@ Benchmark.bm(15) do |x|
   x.report('JSON:')   { n.times { JSON.dump(obj) } }
   x.report('to_json:') { n.times { obj.to_json } }
 
-  Oj.mimic_JSON
-  x.report('JSON (mimic):') { n.times { JSON.dump(obj) } }
-  x.report('to_json (mimic):') { n.times { obj.to_json } }
+  unless no_mimic
+    Oj.mimic_JSON
+    x.report('JSON (mimic):') { n.times { JSON.dump(obj) } }
+    x.report('to_json (mimic):') { n.times { obj.to_json } }
+  end
 
   if use_rails
     Oj.optimize_rails
