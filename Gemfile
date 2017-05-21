@@ -10,3 +10,4 @@ gem 'rails', '~> 5.1.1'
 
 gem 'oj'
 gem 'benchmark-ips'
+gem 'ruby-prof'

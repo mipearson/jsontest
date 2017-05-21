@@ -7,15 +7,19 @@ require 'benchmark/ips'
 APP_PATH = File.expand_path('./config/application', __dir__)
 JSON_FIXTURE = File.read('api_response.json')
 JSON_OBJECT = Oj.load(JSON_FIXTURE)
+CSV_FILE = "out.csv"
 
-puts "Run with: #{ARGV.sort.join(' ')}"
+args = ARGV.join(' ')
+puts "Run with: #{args}"
 
+csv = ARGV.delete("--csv")
 quick = ARGV.delete("--quick")
-oj_mimic_json = ARGV.delete("--mimic-json")
+oj_mimic_json = ARGV.delete("--oj-mimic-json")
 require_json = ARGV.delete("--require-json")
 require_json_after_mimic = ARGV.delete("--require-json-after-mimic")
 use_rails = ARGV.delete("--use-rails")
 oj_optimize_rails = ARGV.delete("--oj-optimize-rails")
+oj_optimize_rails_hash = ARGV.delete("--oj-optimize-rails-hash")
 oj_manual_set_encoder = ARGV.delete("--oj-manual-set-encoder")
 
 if ARGV.length > 0
@@ -31,6 +35,9 @@ if oj_optimize_rails
   Oj::Rails.set_decoder()
   Oj::Rails.optimize()
 end
+if oj_optimize_rails_hash
+  Oj::Rails.optimize(Hash)
+end
 
 if oj_manual_set_encoder
   # as per https://precompile.com/2015/07/25/rails-activesupport-json.html
@@ -44,8 +51,13 @@ if oj_manual_set_encoder
   ActiveSupport.json_encoder = ActiveSupport::JSON::Encoding::Oj
 end
 
-Benchmark.ips() do |x|
-  x.config(time: 1, warmup: 1) if quick # Used for smoke-testing only
+bench = Benchmark.ips() do |x|
+  if quick
+    # Used for smoke-testing only
+    x.config(time: 1, warmup: 1)
+  else
+    x.config(time: 20, warmup: 3)
+  end
 
   x.report("Oj.dump(X, :object)") { Oj.dump(JSON_OBJECT, mode: :object) }
   x.report("Oj::Rails.encode(X)") { Oj::Rails.encode(JSON_OBJECT) }
@@ -60,3 +72,23 @@ Benchmark.ips() do |x|
   end
   x.compare!
 end
+
+if csv
+  require 'csv'
+  first_entry = bench.entries.shift
+  baseline = first_entry.microseconds / first_entry.iterations
+
+  out = ["'" + args.gsub("--csv", ""), sprintf("%0.2f", baseline / 1000)]
+
+  bench.entries.each do |entry|
+    speed = entry.microseconds / entry.iterations
+    times = speed / baseline
+    out << sprintf("%0.2f", times)
+    out << sprintf("%0.2f", speed / 1000)
+  end
+
+  File.open(CSV_FILE, "a+") do |f|
+    f.puts out.to_csv
+  end
+end
+

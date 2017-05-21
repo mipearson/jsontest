@@ -87,6 +87,7 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (12.0.0)
+    ruby-prof (0.15.9)
     sprockets (3.7.1)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -109,6 +110,7 @@ DEPENDENCIES
   benchmark-ips
   oj
   rails (~> 5.1.1)
+  ruby-prof
 
 BUNDLED WITH
    1.14.6
