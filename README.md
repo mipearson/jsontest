@@ -1,3 +1,13 @@
+# Outdated!
+
+The problems exhibited below are resolved if you use Oj version 3.0.10 or newer. If on Rails, add Oj to your gemfile and then do this in an initializer:
+
+```ruby
+Oj.mimic_JSON
+Oj.optimize_rails
+```
+
+
 # JSON Benchmarking
 
 With:
